@@ -1,34 +1,73 @@
-module datetime_mod
 
-  use timedelta_mod
-
+module time_manager
+  
   implicit none
-
   private
 
-  public create_datetime
-  public set_datetime
-  public datetime_type
+  public timedelta, datetime, clock
   public days_of_month
   public accum_days
   public days_of_year
   public is_leap_year
-  public datetime_gregorian_calendar
-  public datetime_noleap_calendar
 
-  integer, parameter :: datetime_gregorian_calendar = 1
-  integer, parameter :: datetime_noleap_calendar    = 2
+  public gregorian, noleap
+  
+  !! calendar type
+  integer, parameter :: gregorian = 1, noleap = 2
 
-  type datetime_type
-    integer :: calendar = datetime_gregorian_calendar
-    integer :: year = 1
-    integer :: month = 1
-    integer :: day = 1
-    integer :: hour = 0
-    integer :: minute = 0
-    integer :: second = 0
+!!---------------------------
+!! definition type timedelta
+  type timedelta
+    real(8) :: days         = 0.0d0
+    real(8) :: hours        = 0.0d0
+    real(8) :: minutes      = 0.0d0
+    real(8) :: seconds      = 0.0d0
+    real(8) :: milliseconds = 0.0d0
+  contains
+    procedure, public :: total_seconds
+    procedure, public :: total_minutes
+    procedure, public :: total_hours
+    procedure, public :: total_days
+    
+    procedure, private :: timedelta_plus_timedelta
+    procedure, private :: timedelta_minus_timedelta
+    procedure, private :: unary_minus_timedelta
+    procedure, private :: timedelta_div_timedelta
+    procedure, private :: timedelta_eq
+    procedure, private :: timedelta_neq
+    procedure, private :: timedelta_gt
+    procedure, private :: timedelta_ge
+    procedure, private :: timedelta_lt
+    procedure, private :: timedelta_le
+
+    generic :: operator(+)  => timedelta_plus_timedelta
+    generic :: operator(-)  => timedelta_minus_timedelta, unary_minus_timedelta
+    generic :: operator(/)  => timedelta_div_timedelta
+    generic :: operator(==) => timedelta_eq
+    generic :: operator(/=) => timedelta_neq
+    generic :: operator(>)  => timedelta_gt
+    generic :: operator(>=) => timedelta_ge
+    generic :: operator(<)  => timedelta_lt
+    generic :: operator(<=) => timedelta_le
+  end type timedelta
+  
+  interface timedelta !! initial function set to the same name with type 
+    module procedure create_timedelta
+  end interface timedelta
+!! end definition type timedelta
+
+!!---------------------------
+!! definition type datetime 
+  type datetime
+    integer :: calendar    = gregorian
+    integer :: year        = 1
+    integer :: month       = 1
+    integer :: day         = 1
+    integer :: hour        = 0
+    integer :: minute      = 0
+    integer :: second      = 0
     real(8) :: millisecond = 0
-    real(8) :: timezone = 0.0d0
+    real(8) :: timezone    = 0.0d0
   contains
     procedure :: init
     procedure :: isoformat
@@ -40,7 +79,13 @@ module datetime_mod
     procedure :: add_minutes
     procedure :: add_seconds
     procedure :: add_milliseconds
+    
+    procedure :: days_in_month
     procedure :: days_in_year
+    
+    procedure :: ceiling_month
+    procedure :: ceiling_day
+
     procedure, private :: assign
     procedure, private :: add_timedelta
     procedure, private :: sub_datetime
@@ -51,33 +96,274 @@ module datetime_mod
     procedure, private :: ge
     procedure, private :: lt
     procedure, private :: le
+    
     generic :: assignment(=) => assign
-    generic :: operator(+) => add_timedelta
-    generic :: operator(-) => sub_datetime
-    generic :: operator(-) => sub_timedelta
-    generic :: operator(==) => eq
-    generic :: operator(/=) => neq
-    generic :: operator(>) => gt
-    generic :: operator(>=) => ge
-    generic :: operator(<) => lt
-    generic :: operator(<=) => le
-  end type datetime_type
+    generic :: operator(+)   => add_timedelta
+    generic :: operator(-)   => sub_datetime, sub_timedelta
+    generic :: operator(==)  => eq
+    generic :: operator(/=)  => neq
+    generic :: operator(>)   => gt
+    generic :: operator(>=)  => ge
+    generic :: operator(<)   => lt
+    generic :: operator(<=)  => le
+  end type datetime
 
-  interface create_datetime
-    module procedure datetime_1
-    module procedure datetime_2
-  end interface create_datetime
+  interface datetime !! initial function set to the same name with type
+    module procedure create_datetime_1
+    module procedure create_datetime_2
+  end interface datetime
+  
+  
+!! end definition type datetime 
 
-  interface set_datetime
-    module procedure datetime_1
-    module procedure datetime_2
-  end interface set_datetime
+
+!!---------------------------
+!! definition type clock 
+  type clock
+    type(datetime)  :: strtTime
+    type(datetime)  :: lastTime
+    type(datetime)  :: Time
+    type(timedelta) :: dt
+    logical :: alarm_repeatmon = .false. !! repeat alarm for monthly
+    logical :: started = .false.
+    logical :: stopped = .false.
+  contains
+    procedure :: reset
+    procedure :: tick
+  end type clock
+  
+  interface clock !! initial function set to the same name with type
+    module procedure create_clock
+  end interface clock
+!! end definition type clock
+
 
 contains
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  pure type(clock) function create_clock(d0, d1, dt) result(res)
+    class(datetime), intent(in) :: d0, d1
+    class(timedelta),intent(in) :: dt
+    
+    if (d1 > d0) then
+        res%strtTime = d0
+        res%Time     = d0
+        res%lastTime = d1
+        res%dt       = dt
+    else
+        res%strtTime = datetime(1980, 1, 1, 0, 0, 0)
+        res%Time     = datetime(1980, 1, 1, 0, 0, 0)
+        res%lastTime = datetime(1981, 1, 1, 0, 0, 0)
+        res%dt       = timedelta(hours=24)
+    end if
+  end function create_clock
   
+
+  pure elemental subroutine reset(this)
+    ! Resets the clock to its start time.
+    class(clock), intent(in out) :: this
+    this % Time    = this%strtTime
+    this % started = .false.
+    this % stopped = .false.
+  end subroutine reset
+
+
+  pure elemental subroutine tick(this)
+    ! Increments the Time of the clock instance by one dt.
+    class(clock), intent(in out) :: this
+    
+    if (this%stopped) return
+    if ( .not. this%started) then
+      this%started = .true.
+      this%Time    = this%strtTime
+    end if
+    
+    if(this%Time + this%dt >= this%Time%ceiling_month() ) then
+        this%alarm_repeatmon = .true.
+    else
+        this%alarm_repeatmon = .false.
+    end if
+    this%Time = this%Time + this%dt
+
+    if (this%Time >= this%lastTime) this%stopped = .true.
+    return
+  end subroutine tick
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  pure type(timedelta) function create_timedelta(days, hours, minutes, seconds, milliseconds) result(res)
+    class(*), intent(in), optional :: days
+    class(*), intent(in), optional :: hours
+    class(*), intent(in), optional :: minutes
+    class(*), intent(in), optional :: seconds
+    class(*), intent(in), optional :: milliseconds
+
+    if (present(days)) then
+      select type (days)
+      type is (integer)
+        res%days = days
+      type is (real(4))
+        res%days = days
+      type is (real(8))
+        res%days = days
+      end select
+    end if
+
+    if (present(hours)) then
+      select type (hours)
+      type is (integer)
+        res%hours = hours
+      type is (real(4))
+        res%hours = hours
+      type is (real(8))
+        res%hours = hours
+      end select
+    end if
+
+    if (present(minutes)) then
+      select type (minutes)
+      type is (integer)
+        res%minutes = minutes
+      type is (real(4))
+        res%minutes = minutes
+      type is (real(8))
+        res%minutes = minutes
+      end select
+    end if
+
+    if (present(seconds)) then
+      select type (seconds)
+      type is (integer)
+        res%seconds = seconds
+      type is (real(4))
+        res%seconds = seconds
+      type is (real(8))
+        res%seconds = seconds
+      end select
+    end if
+
+    if (present(milliseconds)) then
+      select type (milliseconds)
+      type is (integer)
+        res%milliseconds = milliseconds
+      type is (real(4))
+        res%milliseconds = milliseconds
+      type is (real(8))
+        res%milliseconds = milliseconds
+      end select
+    end if
+    
+  end function create_timedelta
+
+
+  pure real(8) function total_seconds(this)
+    class(timedelta), intent(in) :: this
+    total_seconds = this%days * 86400 + this%hours * 3600 + this%minutes * 60 + this%seconds + this%milliseconds * 1.0d-3
+  end function total_seconds
+
+
+  pure real(8) function total_minutes(this)
+    class(timedelta), intent(in) :: this
+    total_minutes = this%days * 1440 + this%hours * 60 + this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0
+  end function total_minutes
+
+
+  pure real(8) function total_hours(this)
+    class(timedelta), intent(in) :: this
+    total_hours = this%days * 24 + this%hours + (this%minutes + (this%seconds + this%milliseconds * 1.0d-3) / 60.0d0) / 60.0d0
+  end function total_hours
+
+  pure real(8) function total_days(this)
+    class(timedelta), intent(in) :: this
+    total_days = this%days + (this%hours+(this%minutes+(this%seconds+this%milliseconds * 1.0d-3) / 60.0d0) / 60.0d0) / 24.0d0
+  end function total_days
+  
+!!
+  pure elemental type(timedelta) function timedelta_plus_timedelta(t0,t1) result(t)
+    ! Adds two `timedelta` instances together and returns a `timedelta`
+    ! instance. Overloads the operator `+`.
+    class(timedelta), intent(in) :: t0, t1
+    t = timedelta(days         = t0 % days         + t1 % days,    &
+                  hours        = t0 % hours        + t1 % hours,   &
+                  minutes      = t0 % minutes      + t1 % minutes, &
+                  seconds      = t0 % seconds      + t1 % seconds, &
+                  milliseconds = t0 % milliseconds + t1 % milliseconds)
+  end function timedelta_plus_timedelta
+
+
+  pure elemental type(timedelta) function timedelta_minus_timedelta(t0,t1) result(t)
+    ! Subtracts a `timedelta` instance from another. Returns a
+    ! `timedelta` instance. Overloads the operator `-`.
+    class(timedelta), intent(in) :: t0, t1
+    t = t0 + (-t1)
+  end function timedelta_minus_timedelta
+
+
+  pure elemental type(timedelta) function unary_minus_timedelta(t0) result(t)
+    ! Takes a negative of a `timedelta` instance. Overloads the operator `-`.
+    class(timedelta), intent(in) :: t0
+    t % days         = -t0 % days
+    t % hours        = -t0 % hours
+    t % minutes      = -t0 % minutes
+    t % seconds      = -t0 % seconds
+    t % milliseconds = -t0 % milliseconds
+  end function unary_minus_timedelta
+
+
+  pure elemental real(8) function timedelta_div_timedelta(t0, t1) result(factor)
+    ! Divide two 'timedelta' instances and return a factor,
+    ! Overloads the operator `/`.
+    class(timedelta), intent(in) :: t0, t1
+    factor = t0%total_seconds()/t1%total_seconds()
+  end function timedelta_div_timedelta
+
+
+  pure elemental logical function timedelta_eq(this, other)
+    class(timedelta), intent(in) :: this
+    class(timedelta), intent(in) :: other
+    timedelta_eq = this%total_seconds() == other%total_seconds()
+  end function timedelta_eq
+
+
+  pure elemental logical function timedelta_neq(this, other)
+    class(timedelta), intent(in) :: this
+    class(timedelta), intent(in) :: other
+    timedelta_neq = this%total_seconds() /= other%total_seconds()
+  end function timedelta_neq
+
+
+  pure elemental logical function timedelta_gt(this, other)
+    class(timedelta), intent(in) :: this
+    class(timedelta), intent(in) :: other
+    timedelta_gt = this%total_seconds() > other%total_seconds()
+  end function timedelta_gt
+
+
+  pure elemental logical function timedelta_ge(this, other)
+    class(timedelta), intent(in) :: this
+    class(timedelta), intent(in) :: other
+    timedelta_ge = this%total_seconds() >= other%total_seconds()
+  end function timedelta_ge
+
+
+  pure elemental logical function timedelta_lt(this, other)
+    class(timedelta), intent(in) :: this
+    class(timedelta), intent(in) :: other
+    timedelta_lt = this%total_seconds() < other%total_seconds()
+  end function timedelta_lt
+  
+
+  pure elemental logical function timedelta_le(this, other)
+    class(timedelta), intent(in) :: this
+    class(timedelta), intent(in) :: other
+    timedelta_le = this%total_seconds() <= other%total_seconds()
+  end function timedelta_le
+  
+  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
   subroutine init(this)
-  
-    class(datetime_type), intent(inout) :: this
+    class(datetime), intent(inout) :: this
     
     integer  values(8)
   
@@ -90,10 +376,10 @@ contains
     this%minute = values(6)
     this%second = values(7)
     this%millisecond = values(8)
-  
   end subroutine init
+  
 
-  pure type(datetime_type) function datetime_1( &
+  pure type(datetime) function create_datetime_1( &
       year,  month,  day,  hour,  minute,  second, millisecond, &
              julday, days, hours, minutes, seconds, &
       timestamp, &
@@ -191,10 +477,10 @@ contains
       end select
     end if
 
-  end function datetime_1
+  end function create_datetime_1
 
-  type(datetime_type) function datetime_2(datetime_str, format_str, timezone, calendar) result(res)
 
+  type(datetime) function create_datetime_2(datetime_str, format_str, timezone, calendar) result(res)
     character(*), intent(in) :: datetime_str
     character(*), intent(in), optional :: format_str
     class(*), intent(in), optional :: timezone
@@ -275,12 +561,11 @@ contains
     end if
 
     if (present(calendar)) res%calendar = calendar
+  end function create_datetime_2
 
-  end function datetime_2
 
   function isoformat(this) result(res)
-
-    class(datetime_type), intent(in) :: this
+    class(datetime), intent(in) :: this
     character(:), allocatable :: res
 
     character(30) tmp
@@ -294,18 +579,17 @@ contains
     end if
 
     res = trim(tmp)
-
   end function isoformat
 
-  function timestamp(this, timezone)
 
-    class(datetime_type), intent(in) :: this
+  function timestamp(this, timezone)
+    class(datetime), intent(in) :: this
     class(*), intent(in), optional :: timezone
     real(8) timestamp
 
-    type(timedelta_type) dt
+    type(timedelta) dt
 
-    dt = this - create_datetime(1970)
+    dt = this - datetime(1970)
     timestamp = dt%total_seconds()
     if (present(timezone)) then
       select type (timezone)
@@ -317,12 +601,11 @@ contains
         timestamp = timestamp - (this%timezone - timezone) * 3600
       end select
     end if
-
   end function timestamp
 
-  function format(this, format_str) result(res)
 
-    class(datetime_type), intent(in) :: this
+  function format(this, format_str) result(res)
+    class(datetime), intent(in) :: this
     character(*), intent(in) :: format_str
     character(:), allocatable :: res
 
@@ -343,7 +626,7 @@ contains
           write(tmp(j:j+1), '(I2.2)') mod(this%year, 100)
           j = j + 2
         case ('j')
-          write(tmp(j:j+2), '(I3.3)') this%days_in_year()
+          write(tmp(j:j+2), '(I3.3)') int(this%days_in_year())
           j = j + 3
         case ('m')
           write(tmp(j:j+1), '(I2.2)') this%month
@@ -374,8 +657,7 @@ contains
   end function format
 
   pure subroutine add_months(this, months)
-
-    class(datetime_type), intent(inout) :: this
+    class(datetime), intent(inout) :: this
     integer, intent(in) :: months
 
     this%month = this%month + months
@@ -387,12 +669,11 @@ contains
       this%year = this%year + this%month / 12 - 1
       this%month = 12 + mod(this%month, 12)
     end if
-
   end subroutine add_months
 
-  pure subroutine add_days(this, days)
 
-    class(datetime_type), intent(inout) :: this
+  pure subroutine add_days(this, days)
+    class(datetime), intent(inout) :: this
     class(*), intent(in) :: days
 
     real(8) residue_days
@@ -429,12 +710,11 @@ contains
         end if
       end if
     end do
-
   end subroutine add_days
 
-  pure subroutine add_hours(this, hours)
 
-    class(datetime_type), intent(inout) :: this
+  pure subroutine add_hours(this, hours)
+    class(datetime), intent(inout) :: this
     class(*), intent(in) :: hours
 
     real(8) residue_hours
@@ -467,12 +747,11 @@ contains
         this%hour = mod(this%hour, 24) + 24
       end if
     end if
-
   end subroutine add_hours
 
-  pure subroutine add_minutes(this, minutes)
 
-    class(datetime_type), intent(inout) :: this
+  pure subroutine add_minutes(this, minutes)
+    class(datetime), intent(inout) :: this
     class(*), intent(in) :: minutes
 
     real(8) residue_minutes
@@ -505,12 +784,11 @@ contains
         this%minute = mod(this%minute, 60) + 60
       end if
     end if
-
   end subroutine add_minutes
 
-  pure subroutine add_seconds(this, seconds)
 
-    class(datetime_type), intent(inout) :: this
+  pure subroutine add_seconds(this, seconds)
+    class(datetime), intent(inout) :: this
     class(*), intent(in) :: seconds
 
     real(8) residue_seconds
@@ -543,12 +821,11 @@ contains
         this%second = mod(this%second, 60) + 60
       end if
     end if
-
   end subroutine add_seconds
 
-  pure subroutine add_milliseconds(this, milliseconds)
 
-    class(datetime_type), intent(inout) :: this
+  pure subroutine add_milliseconds(this, milliseconds)
+    class(datetime), intent(inout) :: this
     class(*), intent(in) :: milliseconds
 
     select type (milliseconds)
@@ -572,28 +849,42 @@ contains
         this%millisecond = mod(this%millisecond, 1000.0d0) + 1000
       end if
     end if
-
   end subroutine add_milliseconds
 
-  pure integer function days_in_year(this) result(res)
+  pure type(datetime) function ceiling_day(this) result(res)
+    class(datetime), intent(in) :: this
+    res = datetime(this%year, this%month, this%day, 0, 0, 0, calendar=this%calendar)
+    call res%add_days(1)
+    return
+  end function ceiling_day
+  
+  pure type(datetime) function ceiling_month(this) result(res)
+    class(datetime), intent(in) :: this
+    res = datetime(this%year, this%month, 1, 0, 0, 0, calendar=this%calendar)
+    call res%add_months(1)
+    return
+  end function ceiling_month
+  
 
-    class(datetime_type), intent(in) :: this
-
+  pure real(8) function days_in_month(this) result(res)
+    class(datetime), intent(in) :: this
+    res = this%day + this%hour/24.0d0 + this%minute/24.0d0/60 + this%second/24.0d0/3600 + this%millisecond/24.0d0/3600/1000
+  end function days_in_month
+  
+  pure real(8) function days_in_year(this) result(res)
+    class(datetime), intent(in) :: this
     integer month
-
     res = 0
     do month = 1, this%month - 1
       res = res + days_of_month(this%year, month, this%calendar)
     end do
-    res = res + this%day
-
+    res = res + this%days_in_month()
   end function days_in_year
 
+
   pure elemental subroutine assign(this, other)
-
-    class(datetime_type), intent(inout) :: this
-    class(datetime_type), intent(in) :: other
-
+    class(datetime), intent(inout) :: this
+    class(datetime), intent(in) :: other
     this%calendar    = other%calendar
     this%year        = other%year
     this%month       = other%month
@@ -603,13 +894,11 @@ contains
     this%second      = other%second
     this%millisecond = other%millisecond
     this%timezone    = other%timezone
-
   end subroutine assign
 
-  elemental type(datetime_type) function add_timedelta(this, td) result(res)
-
-    class(datetime_type), intent(in) :: this
-    type(timedelta_type), intent(in) :: td
+  elemental type(datetime) function add_timedelta(this, td) result(res)
+    class(datetime), intent(in) :: this
+    type(timedelta), intent(in) :: td
 
     res = this
     call res%add_milliseconds(td%milliseconds)
@@ -617,14 +906,12 @@ contains
     call res%add_minutes(td%minutes)
     call res%add_hours(td%hours)
     call res%add_days(td%days)
-    call res%add_months(td%months)
-
   end function add_timedelta
 
-  pure elemental type(datetime_type) function sub_timedelta(this, td) result(res)
 
-    class(datetime_type), intent(in) :: this
-    type(timedelta_type), intent(in) :: td
+  pure elemental type(datetime) function sub_timedelta(this, td) result(res)
+    class(datetime), intent(in) :: this
+    type(timedelta), intent(in) :: td
 
     res = this
     call res%add_milliseconds(-td%milliseconds)
@@ -632,15 +919,12 @@ contains
     call res%add_minutes(-td%minutes)
     call res%add_hours(-td%hours)
     call res%add_days(-td%days)
-    call res%add_months(-td%months)
-
   end function sub_timedelta
 
-  type(timedelta_type) recursive function sub_datetime(this, other) result(res)
 
-    class(datetime_type), intent(in) :: this
-    class(datetime_type), intent(in) :: other
-
+  type(timedelta) recursive function sub_datetime(this, other) result(res)
+    class(datetime), intent(in) :: this
+    class(datetime), intent(in) :: other
     integer year, month, days, hours, minutes, seconds
     real(8) milliseconds
 
@@ -707,7 +991,7 @@ contains
         end if
       else
         do year = other%year + 1, this%year - 1
-          if (this%calendar == datetime_gregorian_calendar) then
+          if (this%calendar == gregorian) then
             days = days + 365 + merge(1, 0, is_leap_year(year))
           else
             days = days + 365
@@ -749,17 +1033,14 @@ contains
       end if
       res = create_timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds, milliseconds=milliseconds)
     else
-      res = sub_datetime(other, this)
-      res = res%negate()
+      res = - sub_datetime(other, this)
     end if
-
   end function sub_datetime
 
+
   pure elemental logical function eq(this, other)
-
-    class(datetime_type), intent(in) :: this
-    class(datetime_type), intent(in) :: other
-
+    class(datetime), intent(in) :: this
+    class(datetime), intent(in) :: other
     eq = this%year        == other%year   .and. &
          this%month       == other%month  .and. &
          this%day         == other%day    .and. &
@@ -767,22 +1048,19 @@ contains
          this%minute      == other%minute .and. &
          this%second      == other%second .and. &
          this%millisecond == other%millisecond
-
   end function eq
 
+
   pure elemental logical function neq(this, other)
-
-    class(datetime_type), intent(in) :: this
-    class(datetime_type), intent(in) :: other
-
+    class(datetime), intent(in) :: this
+    class(datetime), intent(in) :: other
     neq = .not. this == other
-
   end function neq
 
-  pure elemental logical function gt(this, other)
 
-    class(datetime_type), intent(in) :: this
-    class(datetime_type), intent(in) :: other
+  pure elemental logical function gt(this, other)
+    class(datetime), intent(in) :: this
+    class(datetime), intent(in) :: other
 
     if (this%year < other%year) then
       gt = .false.
@@ -839,94 +1117,78 @@ contains
       gt = .true.
       return
     end if
-
     gt = this /= other
-
   end function gt
+  
 
   pure elemental logical function ge(this, other)
-
-    class(datetime_type), intent(in) :: this
-    class(datetime_type), intent(in) :: other
-
+    class(datetime), intent(in) :: this
+    class(datetime), intent(in) :: other
     ge = this > other .or. this == other
-
   end function ge
 
+
   pure elemental logical function lt(this, other)
-
-    class(datetime_type), intent(in) :: this
-    class(datetime_type), intent(in) :: other
-
+    class(datetime), intent(in) :: this
+    class(datetime), intent(in) :: other
     lt = other > this
-
   end function lt
 
+
   pure elemental logical function le(this, other)
-
-    class(datetime_type), intent(in) :: this
-    class(datetime_type), intent(in) :: other
-
+    class(datetime), intent(in) :: this
+    class(datetime), intent(in) :: other
     le = other > this .or. this == other
-
   end function le
+  
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   pure integer function days_of_month(year, month, calendar) result(res)
-
     integer, intent(in) :: year
     integer, intent(in) :: month
     integer, intent(in) :: calendar
-
     integer, parameter :: days(12) = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-
-    if (month == 2 .and. is_leap_year(year) .and. calendar == datetime_gregorian_calendar) then
+    if (month == 2 .and. is_leap_year(year) .and. calendar == gregorian) then
       res = 29
     else
       res = days(month)
     end if
-
   end function days_of_month
 
-  pure integer function accum_days(year, month, day, calendar) result(res)
 
+  pure integer function accum_days(year, month, day, calendar) result(res)
     integer, intent(in) :: year
     integer, intent(in) :: month
     integer, intent(in) :: day
     integer, intent(in) :: calendar
-
     integer mon
-
     res = day
     do mon = 1, month - 1
       res = res + days_of_month(year, mon, calendar)
     end do
-
   end function accum_days
 
-  pure integer function days_of_year(year, calendar) result(res)
 
+  pure integer function days_of_year(year, calendar) result(res)
     integer, intent(in) :: year
     integer, intent(in) :: calendar
-
     select case (calendar)
-    case (datetime_gregorian_calendar)
+    case (gregorian)
       if (is_leap_year(year)) then
         res = 366
       else
         res = 365
       end if
-    case (datetime_noleap_calendar)
+    case (noleap)
       res = 365
     end select
-
   end function days_of_year
 
+
   pure logical function is_leap_year(year) result(res)
-
     integer, intent(in) :: year
-
     res = (mod(year, 4) == 0 .and. .not. mod(year, 100) == 0) .or. (mod(year, 400) == 0)
-
   end function is_leap_year
 
-end module datetime_mod
+end module time_manager
+
