@@ -22,8 +22,8 @@ program test_time_manager
   factor = dt_ocean/dt_atmos
   write(*, *) factor
   
-  Time_strt = datetime(1980, 1, 1, 0, 0, 0, calendar=noleap)
-  Time_last = datetime(2020, 1, 1, 0, 0, 0, calendar=noleap)
+  Time_strt = datetime(1980, 1, 1, 0, 0, 0, calendar=gregorian)
+  Time_last = datetime(1981, 1, 1, 0, 0, 0, calendar=gregorian)
   write(*, *) Time_strt%isoformat(), " to ", Time_last%isoformat()
 
   clock_atmos = clock(Time_strt, Time_last, dt_atmos)
@@ -35,12 +35,13 @@ program test_time_manager
       
       call clock_atmos%tick()
       
-      if( clock_atmos%alarm_repeatmon ) then
-           dt_tmp = clock_atmos%Time-Time_strt
-        !  print *, dt_tmp%total_days()
-          write(*, *) clock_atmos%Time%isoformat(), clock_atmos%Time%days_in_year(), dt_tmp%total_days()-days_prev
-
+      if( clock_atmos%alarm_d) then
+          write(*,  '(A, F12.1, I12, F12.1)') clock_atmos%Time%isoformat(), clock_atmos%Time%days_in_year(), clock_atmos%index_d, clock_atmos%axis_d
       end if
+      
+!      if( clock_atmos%alarm_m ) then
+!          write(*, *) clock_atmos%Time%isoformat(), clock_atmos%index_m, clock_atmos%axis_m
+!      end if
       
   end do
 

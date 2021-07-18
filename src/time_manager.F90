@@ -14,7 +14,10 @@ module time_manager
   
   !! calendar type
   integer, parameter :: gregorian = 1, noleap = 2
-
+  !! base date
+  integer, parameter      :: default_year  = 0001
+  character(*), parameter :: default_units = 'days since 0001-01-01 00:00:00'
+  
 !!---------------------------
 !! definition type timedelta
   type timedelta
@@ -82,7 +85,6 @@ module time_manager
     
     procedure :: days_in_month
     procedure :: days_in_year
-    
     procedure :: ceiling_month
     procedure :: ceiling_day
 
@@ -112,8 +114,6 @@ module time_manager
     module procedure create_datetime_1
     module procedure create_datetime_2
   end interface datetime
-  
-  
 !! end definition type datetime 
 
 
@@ -123,10 +123,21 @@ module time_manager
     type(datetime)  :: strtTime
     type(datetime)  :: lastTime
     type(datetime)  :: Time
+    type(datetime)  :: prevTime
+    
     type(timedelta) :: dt
-    logical :: alarm_repeatmon = .false. !! repeat alarm for monthly
+    
     logical :: started = .false.
     logical :: stopped = .false.
+    
+    logical :: alarm_d !! repeat alarm for daily
+    integer :: index_d = 0
+    real(8) :: axis_d  = 0.d0
+    
+    logical :: alarm_m !! repeat alarm for monthly
+    integer :: index_m = 0
+    real(8) :: axis_m  = 0.d0
+    
   contains
     procedure :: reset
     procedure :: tick
@@ -155,6 +166,8 @@ contains
         res%lastTime = datetime(1981, 1, 1, 0, 0, 0)
         res%dt       = timedelta(hours=24)
     end if
+    res%index_d = 0
+    res%index_m = 0
   end function create_clock
   
 
@@ -167,9 +180,10 @@ contains
   end subroutine reset
 
 
+
   pure elemental subroutine tick(this)
     ! Increments the Time of the clock instance by one dt.
-    class(clock), intent(in out) :: this
+    class(clock), intent(inout)   :: this
     
     if (this%stopped) return
     if ( .not. this%started) then
@@ -177,18 +191,35 @@ contains
       this%Time    = this%strtTime
     end if
     
-    if(this%Time + this%dt >= this%Time%ceiling_month() ) then
-        this%alarm_repeatmon = .true.
+    this%prevTime  = this%Time
+    this%Time      = this%prevTime + this%dt
+    
+    !! alarm for daily
+    if(this%Time >= this%prevTime%ceiling_day() ) then
+        this%alarm_d = .true.
+        this%index_d = this%index_d + 1
+        this%axis_d  = this%Time%timestamp() - 1
     else
-        this%alarm_repeatmon = .false.
+        this%alarm_d = .false.
     end if
-    this%Time = this%Time + this%dt
 
+    !! alarm for monthly
+    if(this%Time >= this%prevTime%ceiling_month() ) then
+        this%alarm_m = .true.
+        this%index_m = this%index_m + 1
+        this%axis_m  = this%Time%timestamp() - int(this%prevTime%days_in_month())
+    else
+        this%alarm_m = .false.
+    end if
+    
     if (this%Time >= this%lastTime) this%stopped = .true.
     return
   end subroutine tick
+  
+  
 
 
+  
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
   pure type(timedelta) function create_timedelta(days, hours, minutes, seconds, milliseconds) result(res)
@@ -407,11 +438,11 @@ contains
     if (present(calendar)) res%calendar = calendar
 
     if (present(timestamp)) then
-      ! Assume the start date time is UTC 1970-01-01 00:00:00.
-      res%year = 1970
-      res%month = 1
-      res%day = 1
-      res%hour = 0
+      ! Assume the start date time is UTC 0001-01-01 00:00:00 defined default_year, default_units
+      res%year   = default_year
+      res%month  = 1
+      res%day    = 1
+      res%hour   = 0
       res%minute = 0
       res%second = 0
       res%millisecond = 0
@@ -589,16 +620,16 @@ contains
 
     type(timedelta) dt
 
-    dt = this - datetime(1970)
-    timestamp = dt%total_seconds()
+    dt = this - datetime(default_year)
+    timestamp = dt%total_days()
     if (present(timezone)) then
       select type (timezone)
       type is (integer)
-        timestamp = timestamp - (this%timezone - timezone) * 3600
+        timestamp = timestamp - (this%timezone - timezone)/24.d0
       type is (real(4))
-        timestamp = timestamp - (this%timezone - timezone) * 3600
+        timestamp = timestamp - (this%timezone - timezone)/24.d0
       type is (real(8))
-        timestamp = timestamp - (this%timezone - timezone) * 3600
+        timestamp = timestamp - (this%timezone - timezone)/24.d0
       end select
     end if
   end function timestamp
@@ -1189,6 +1220,9 @@ contains
     integer, intent(in) :: year
     res = (mod(year, 4) == 0 .and. .not. mod(year, 100) == 0) .or. (mod(year, 400) == 0)
   end function is_leap_year
+  
+  
+  
 
 end module time_manager
 
