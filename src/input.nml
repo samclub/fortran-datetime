@@ -1,0 +1,20 @@
+
+&time_nml
+Time_strt%year     = 1958
+Time_strt%month    = 1
+Time_strt%day      = 1
+Time_strt%hour     = 0
+Time_strt%minute   = 0
+Time_strt%calendar = 2     !! 2 is noleap, 1 gregorian
+Time_last%year     = 2018
+Time_last%month    = 1
+Time_last%day      = 1
+Time_last%hour     = 0
+Time_last%minute   = 0
+Time_last%calendar = 2     !! 2 is noleap, 1 gregorian
+dt_atmos%hours     = 2
+/
+
+
+
+

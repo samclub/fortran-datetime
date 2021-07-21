@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+   <meta name="description" content="Time_Manager Library For Mordern Fortran">
+    
+    <meta name="author" content="Sen Zhao" >
+    <link rel="icon" href="../favicon.png">
+
+    <title>clock &ndash; time_manager</title>
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/pygments.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/local.css" rel="stylesheet">
+    
+    <link  href="../tipuesearch/tipuesearch.css" rel="stylesheet">
+    
+    
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+    <script src="../js/jquery-2.1.3.min.js"></script>
+    <script src="../js/svg-pan-zoom.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="../index.html">time_manager </a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+        
+            <li class="dropdown hidden-xs visible-sm visible-md hidden-lg">
+              <a href="#" class="dropdown-toggle"
+              data-toggle="dropdown" role="button"
+              aria-haspopup="true"
+     aria-expanded="false">Contents <span class="caret"></span></a>
+        <ul class="dropdown-menu">
+          
+              
+            <li><a href="../lists/files.html">Source Files</a></li>
+        
+        
+        
+            <li><a href="../lists/modules.html">Modules</a></li>
+        
+            
+                                
+            <li><a href="../lists/procedures.html">Procedures</a></li>
+        
+               
+            <li><a href="../lists/types.html">Derived Types</a></li>
+        
+        
+            <li><a href="../lists/programs.html">Programs</a></li>
+        
+            </ul>
+            </li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/files.html">Source Files</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/modules.html">Modules</a></li>
+
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/procedures.html">Procedures</a></li>
+
+                             
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/types.html">Derived Types</a></li>
+
+
+<li class="visible-xs hidden-sm visible-lg"><a href="../lists/programs.html">Programs</a></li>
+
+          </ul>
+        
+        <form action="../search.html" class="navbar-form navbar-right" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search" name="q" id="tipue_search_input" autocomplete="off" required>
+        </div>
+<!--
+        <button type="submit" class="btn btn-default">Submit</button>
+-->
+        </form>
+        
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container">
+    
+  
+  <div class="row">
+    <h1>clock
+   <small>Interface</small>
+    
+    </h1>
+    
+<div class="row">
+  <div class="col-lg-12">
+<div class="well well-sm">
+  <ul class="list-inline" style="margin-bottom:0px;display:inline">
+     
+     
+     
+     
+    
+    
+     <li><i class="fa fa-list-ol"></i>
+       <a data-toggle="tooltip"
+    data-placement="bottom" data-html="true"
+    title="<p> 0.2% of total for procedures.</p>Including implementation: 20 statements,  1.1% of total for procedures.">3 statements</a>
+     </li> 
+     
+     
+     
+    <li><i class="fa fa-code"></i><a href="../src/time_manager.F90"> Source File</a></li>
+     
+     
+  </ul>
+  <ol class="breadcrumb in-well text-right">
+  
+    
+     <li><a href='../sourcefile/time_manager.f90.html'>time_manager.F90</a></li>
+    
+     <li><a href='../module/time_manager.html'>time_manager</a></li>
+    
+  
+     <li class="active">clock</li>
+  </ol>
+</div>
+</div>
+</div>
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+  })
+</script>
+
+  </div>
+  
+  <div class="row">
+    <div class="col-md-3 hidden-xs hidden-sm visible-md visible-lg">
+      
+<div id="sidebar">
+  
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#modprocs-0">Module Procedures</a></h3></div>
+  <div id="modprocs-0" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../interface/clock.html#moduleprocedure-create_clock">create_clock</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+</div>
+
+    </div>
+    
+    <div class="col-md-9" id='text'>
+      <h2>public interface clock</h2>
+   <p>initial function set to the same name with type</p>
+     
+    <div class="panel panel-default">
+      <div class="panel-heading">
+  <h3 class="panel-title">Calls</h3>
+      </div>
+      <div class="panel-body">
+  <div class="depgraph"><?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.26.0 (20091210.2329)
+ -->
+<!-- Title: interface~~clock~~CallsGraph Pages: 1 -->
+<svg id="interfaceclockCallsGraph" width="641pt" height="100pt"
+ viewBox="0.00 0.00 641.00 99.94" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="interface~~clock~~CallsGraph" class="graph" transform="scale(0.861559 0.861559) rotate(0) translate(4 112)">
+<title>interface~~clock~~CallsGraph</title>
+<polygon fill="white" stroke="white" points="-4,5 -4,-112 741,-112 741,5 -4,5"/>
+<!-- interface~clock -->
+<g id="node1" class="node"><title>interface~clock</title>
+<polygon fill="none" stroke="black" points="54,-87.5 2.4869e-14,-87.5 0,-62.5 54,-62.5 54,-87.5"/>
+<text text-anchor="middle" x="27" y="-72.05" font-family="Helvetica,sans-Serif" font-size="10.50">clock</text>
+</g>
+<!-- proc~create_clock -->
+<g id="node2" class="node"><title>proc~create_clock</title>
+<a xlink:href=".././proc/create_clock.html" xlink:title="create_clock">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="163,-87.5 91,-87.5 91,-62.5 163,-62.5 163,-87.5"/>
+<text text-anchor="middle" x="127" y="-72.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">create_clock</text>
+</a>
+</g>
+<!-- interface~clock&#45;&gt;proc~create_clock -->
+<g id="edge2" class="edge"><title>interface~clock&#45;&gt;proc~create_clock</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M54.0614,-75C62.0437,-75 71.0218,-75 79.8791,-75"/>
+<polygon fill="#000000" stroke="#000000" points="80.1543,-78.5001 90.1542,-75 80.1542,-71.5001 80.1543,-78.5001"/>
+</g>
+<!-- interface~timedelta -->
+<g id="node4" class="node"><title>interface~timedelta</title>
+<a xlink:href=".././interface/timedelta.html" xlink:title="timedelta">
+<polygon fill="#a7506f" stroke="#a7506f" points="256,-108.5 200,-108.5 200,-83.5 256,-83.5 256,-108.5"/>
+<text text-anchor="middle" x="228" y="-93.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">timedelta</text>
+</a>
+</g>
+<!-- proc~create_clock&#45;&gt;interface~timedelta -->
+<g id="edge4" class="edge"><title>proc~create_clock&#45;&gt;interface~timedelta</title>
+<path fill="none" stroke="#000000" d="M163.749,-82.6409C172.343,-84.4278 181.513,-86.3344 190.154,-88.1311"/>
+<polygon fill="#000000" stroke="#000000" points="189.486,-91.567 199.99,-90.176 190.911,-84.7136 189.486,-91.567"/>
+</g>
+<!-- interface~datetime -->
+<g id="node5" class="node"><title>interface~datetime</title>
+<a xlink:href=".././interface/datetime.html" xlink:title="datetime">
+<polygon fill="#a7506f" stroke="#a7506f" points="255,-66.5 201,-66.5 201,-41.5 255,-41.5 255,-66.5"/>
+<text text-anchor="middle" x="228" y="-51.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">datetime</text>
+</a>
+</g>
+<!-- proc~create_clock&#45;&gt;interface~datetime -->
+<g id="edge6" class="edge"><title>proc~create_clock&#45;&gt;interface~datetime</title>
+<path fill="none" stroke="#000000" d="M163.749,-67.3591C172.587,-65.5216 182.033,-63.5576 190.887,-61.7166"/>
+<polygon fill="#000000" stroke="#000000" points="191.859,-65.0894 200.937,-59.627 190.434,-58.236 191.859,-65.0894"/>
+</g>
+<!-- proc~create_timedelta -->
+<g id="node9" class="node"><title>proc~create_timedelta</title>
+<a xlink:href=".././proc/create_timedelta.html" xlink:title="create_timedelta">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="389,-108.5 297,-108.5 297,-83.5 389,-83.5 389,-108.5"/>
+<text text-anchor="middle" x="343" y="-93.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">create_timedelta</text>
+</a>
+</g>
+<!-- interface~timedelta&#45;&gt;proc~create_timedelta -->
+<g id="edge8" class="edge"><title>interface~timedelta&#45;&gt;proc~create_timedelta</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M256.132,-96C265.404,-96 276.069,-96 286.68,-96"/>
+<polygon fill="#000000" stroke="#000000" points="286.789,-99.5001 296.789,-96 286.789,-92.5001 286.789,-99.5001"/>
+</g>
+<!-- proc~create_datetime_1 -->
+<g id="node8" class="node"><title>proc~create_datetime_1</title>
+<a xlink:href=".././proc/create_datetime_1.html" xlink:title="create_datetime_1">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="394,-66.5 292,-66.5 292,-41.5 394,-41.5 394,-66.5"/>
+<text text-anchor="middle" x="343" y="-51.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">create_datetime_1</text>
+</a>
+</g>
+<!-- interface~datetime&#45;&gt;proc~create_datetime_1 -->
+<g id="edge10" class="edge"><title>interface~datetime&#45;&gt;proc~create_datetime_1</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M255.253,-54C263.253,-54 272.344,-54 281.571,-54"/>
+<polygon fill="#000000" stroke="#000000" points="281.591,-57.5001 291.591,-54 281.591,-50.5001 281.591,-57.5001"/>
+</g>
+<!-- proc~create_datetime_2 -->
+<g id="node10" class="node"><title>proc~create_datetime_2</title>
+<a xlink:href=".././proc/create_datetime_2.html" xlink:title="create_datetime_2">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="394,-24.5 292,-24.5 292,0.5 394,0.5 394,-24.5"/>
+<text text-anchor="middle" x="343" y="-9.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">create_datetime_2</text>
+</a>
+</g>
+<!-- interface~datetime&#45;&gt;proc~create_datetime_2 -->
+<g id="edge12" class="edge"><title>interface~datetime&#45;&gt;proc~create_datetime_2</title>
+<path fill="none" stroke="#000000" stroke-dasharray="5,2" d="M255.253,-44.0466C268.657,-39.1514 285.125,-33.1368 300.161,-27.6456"/>
+<polygon fill="#000000" stroke="#000000" points="301.595,-30.8479 309.788,-24.1296 299.194,-24.2726 301.595,-30.8479"/>
+</g>
+<!-- proc~days_of_month -->
+<g id="node14" class="node"><title>proc~days_of_month</title>
+<a xlink:href=".././proc/days_of_month.html" xlink:title="days_of_month">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="626,-66.5 540,-66.5 540,-41.5 626,-41.5 626,-66.5"/>
+<text text-anchor="middle" x="583" y="-51.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">days_of_month</text>
+</a>
+</g>
+<!-- proc~create_datetime_1&#45;&gt;proc~days_of_month -->
+<g id="edge14" class="edge"><title>proc~create_datetime_1&#45;&gt;proc~days_of_month</title>
+<path fill="none" stroke="#000000" d="M394.063,-54.685C405.864,-54.8161 418.369,-54.9332 430,-55 462.888,-55.189 471.112,-55.2081 504,-55 512.38,-54.947 521.259,-54.8623 529.922,-54.7641"/>
+<polygon fill="#000000" stroke="#000000" points="529.993,-58.2636 539.95,-54.6437 529.909,-51.2641 529.993,-58.2636"/>
+</g>
+<!-- proc~accum_days -->
+<g id="node15" class="node"><title>proc~accum_days</title>
+<a xlink:href=".././proc/accum_days.html" xlink:title="accum_days">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="503,-46.5 431,-46.5 431,-21.5 503,-21.5 503,-46.5"/>
+<text text-anchor="middle" x="467" y="-31.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">accum_days</text>
+</a>
+</g>
+<!-- proc~create_datetime_1&#45;&gt;proc~accum_days -->
+<g id="edge16" class="edge"><title>proc~create_datetime_1&#45;&gt;proc~accum_days</title>
+<path fill="none" stroke="#000000" d="M394.151,-45.7498C402.784,-44.3575 411.705,-42.9185 420.219,-41.5454"/>
+<polygon fill="#000000" stroke="#000000" points="421.039,-44.9584 430.354,-39.9106 419.924,-38.0477 421.039,-44.9584"/>
+</g>
+<!-- proc~is_leap_year -->
+<g id="node18" class="node"><title>proc~is_leap_year</title>
+<a xlink:href=".././proc/is_leap_year.html" xlink:title="is_leap_year">
+<polygon fill="#d94e8f" stroke="#d94e8f" points="735,-66.5 663,-66.5 663,-41.5 735,-41.5 735,-66.5"/>
+<text text-anchor="middle" x="699" y="-51.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">is_leap_year</text>
+</a>
+</g>
+<!-- proc~days_of_month&#45;&gt;proc~is_leap_year -->
+<g id="edge18" class="edge"><title>proc~days_of_month&#45;&gt;proc~is_leap_year</title>
+<path fill="none" stroke="#000000" d="M626.194,-54C634.62,-54 643.493,-54 652.035,-54"/>
+<polygon fill="#000000" stroke="#000000" points="652.237,-57.5001 662.237,-54 652.237,-50.5001 652.237,-57.5001"/>
+</g>
+<!-- proc~accum_days&#45;&gt;proc~days_of_month -->
+<g id="edge20" class="edge"><title>proc~accum_days&#45;&gt;proc~days_of_month</title>
+<path fill="none" stroke="#000000" d="M503.703,-40.3281C511.909,-41.7429 520.775,-43.2715 529.504,-44.7766"/>
+<polygon fill="#000000" stroke="#000000" points="529.192,-48.2743 539.641,-46.5243 530.381,-41.376 529.192,-48.2743"/>
+</g>
+</g>
+</svg>
+</div><script>var paninterfaceclockCallsGraph = svgPanZoom('#interfaceclockCallsGraph', {zoomEnabled: true,controlIconsEnabled: true, fit: true, center: true,}); </script><div><a type="button" class="graph-help" data-toggle="modal" href="#graph-help-text">Help</a></div><div class="modal fade" id="graph-help-text" tabindex="-1" role="dialog"><div class="modal-dialog modal-lg" role="document"><div class="modal-content"><div class="modal-header"><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button><h4 class="modal-title" id="-graph-help-label">Graph Key</h4></div><div class="modal-body">
+    <p>Nodes of different colours represent the following: </p>
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+ "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Generated by graphviz version 2.26.0 (20091210.2329)
+ -->
+<!-- Title: Graph Key Pages: 1 -->
+<svg width="556pt" height="34pt"
+ viewBox="0.00 0.00 556.00 34.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="graph1" class="graph" transform="scale(1 1) rotate(0) translate(4 30)">
+<title>Graph Key</title>
+<polygon fill="white" stroke="white" points="-4,5 -4,-30 553,-30 553,5 -4,5"/>
+<!-- Subroutine -->
+<g id="node1" class="node"><title>Subroutine</title>
+<polygon fill="#d9534f" stroke="#d9534f" points="64,-25.5 3.19744e-14,-25.5 0,-0.5 64,-0.5 64,-25.5"/>
+<text text-anchor="middle" x="32" y="-10.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Subroutine</text>
+</g>
+<!-- Function -->
+<g id="node2" class="node"><title>Function</title>
+<polygon fill="#d94e8f" stroke="#d94e8f" points="136,-25.5 82,-25.5 82,-0.5 136,-0.5 136,-25.5"/>
+<text text-anchor="middle" x="109" y="-10.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Function</text>
+</g>
+<!-- Interface -->
+<g id="node3" class="node"><title>Interface</title>
+<polygon fill="#a7506f" stroke="#a7506f" points="208,-25.5 154,-25.5 154,-0.5 208,-0.5 208,-25.5"/>
+<text text-anchor="middle" x="181" y="-10.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Interface</text>
+</g>
+<!-- Unknown Procedure Type -->
+<g id="node4" class="node"><title>Unknown Procedure Type</title>
+<polygon fill="#777777" stroke="#777777" points="362,-25.5 226,-25.5 226,-0.5 362,-0.5 362,-25.5"/>
+<text text-anchor="middle" x="294" y="-10.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Unknown Procedure Type</text>
+</g>
+<!-- Program -->
+<g id="node5" class="node"><title>Program</title>
+<polygon fill="#f0ad4e" stroke="#f0ad4e" points="434,-25.5 380,-25.5 380,-0.5 434,-0.5 434,-25.5"/>
+<text text-anchor="middle" x="407" y="-10.05" font-family="Helvetica,sans-Serif" font-size="10.50" fill="white">Program</text>
+</g>
+<!-- This Page&#39;s Entity -->
+<g id="node6" class="node"><title>This Page&#39;s Entity</title>
+<polygon fill="none" stroke="black" points="548,-25.5 452,-25.5 452,-0.5 548,-0.5 548,-25.5"/>
+<text text-anchor="middle" x="500" y="-10.05" font-family="Helvetica,sans-Serif" font-size="10.50">This Page&#39;s Entity</text>
+</g>
+</g>
+</svg>
+
+    
+    <p>Solid arrows point from a procedure to one which it calls. Dashed 
+    arrows point from an interface to procedures which implement that interface.
+    This could include the module procedures in a generic interface or the
+    implementation in a submodule of an interface in a parent module.
+    </p>
+    </div></div></div></div>
+      </div>
+    </div>
+     
+     
+    <br>
+
+     <section class="visible-xs visible-sm hidden-md">
+       
+<h3>Contents</h3>
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="panel panel-primary">
+  <div class="panel-heading text-left"><h3 class="panel-title"><a data-toggle="collapse" href="#modprocs-1">Module Procedures</a></h3></div>
+  <div id="modprocs-1" class="panel-collapse collapse">
+    <div class="list-group">
+      
+      <a class="list-group-item" href="../interface/clock.html#moduleprocedure-create_clock">create_clock</a>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+     </section>
+     <br class="visible-xs visible-sm hidden-md">
+     
+  
+
+  
+
+  
+   <h2>Module Procedures</h2>
+   
+    
+  <div class="panel panel-default">
+  <div class="panel-heading codesum"><span class="anchor" id="proc-create_clock"></span><h3>
+private pure function <a href='../proc/create_clock.html'>create_clock</a>(d0, d1, dt) result(res)
+    
+    
+   
+</h3></div>
+  <div class="panel-body">
+       
+    
+    
+    <h4>Arguments</h4>
+    
+      
+      
+<table class="table table-striped varlist">
+<thead><tr><th>Type</th>
+<th>Intent</th><th>Optional</th>
+<th>Attributes</th><th></th><th>Name</th><th></th></thead>
+
+
+
+<tbody>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/datetime.html'>datetime</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>d0</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/datetime.html'>datetime</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>d1</strong></td><td></td>
+  
+</tr>
+
+  
+  
+  
+  
+<tr>
+  
+  <td><span class="anchor" ></span>class(<a href='../type/timedelta.html'>timedelta</a>),</td>
+  <td>intent(in)</td>
+  <td></td>
+  
+  <td></td><td>::</td>
+  <td><strong>dt</strong></td><td></td>
+  
+</tr>
+
+</tbody>
+</table>
+
+      
+    
+    
+
+  
+  
+  
+  
+     <h4>Return Value <small>type(<a href='../type/clock.html'>clock</a>)
+  </small></h4>
+  
+    
+
+  </div>
+  </div>
+
+   
+     
+
+ </div>
+</div>
+
+
+    <hr>    
+    </div> <!-- /container -->
+    <footer>
+      <div class="container">
+      <div class="row">
+        <div class="col-xs-6 col-md-4"><p>&copy; 2021 <a rel="license" href="http://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc/4.0/80x15.png" /></a>
+                                          </p></div>
+        <div class="col-xs-6 col-md-4 col-md-push-4">
+          <p class="text-right">
+            Documentation generated by 
+            <a href="https://github.com/cmacmackin/ford">FORD</a>
+            
+          </p>
+        </div>
+        <div class="col-xs-12 col-md-4 col-md-pull-4"><p class="text-center"> time_manager was developed by Sen Zhao</p></div>
+      </div>
+      <br>
+      </div> <!-- /container -->    
+    </footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+<!--
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+    <script src="../js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="../js/ie10-viewport-bug-workaround.js"></script>
+
+    <!-- MathJax JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { extensions: ['AMSmath.js','AMSsymbols.js','noErrors.js','noUndefined.js'], equationNumbers: { autoNumber: 'AMS' } },
+        jax: ['input/TeX','input/MathML','output/HTML-CSS'],
+        extensions: ['tex2jax.js','mml2jax.js','MathMenu.js','MathZoom.js']
+      });
+    </script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+    <script src="../tipuesearch/tipuesearch_content.js"></script>
+    <script src="../tipuesearch/tipuesearch_set.js"></script>
+    <script src="../tipuesearch/tipuesearch.js"></script>
+    
+    
+  </body>
+</html>
